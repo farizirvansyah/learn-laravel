@@ -13,20 +13,32 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-        Role::insert([
-            [
-                'name' => 'Administrator',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Kasir',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Pimpinan',
-                'is_active' => true
-            ]
+        // Role::insert([
+        //     [
+        //         'name' => 'Administrator',
+        //         'is_active' => true,
+        //     ],
+        //     [
+        //         'name' => 'Kasir',
+        //         'is_active' => true,
+        //     ],
+        //     [
+        //         'name' => 'Pimpinan',
+        //         'is_active' => true
+        //     ]
+        // ]);
+
+        Role::create([
+            'name' => 'Administrator',
+            'is_active' => true,
+        ]);
+        Role::create([
+            'name' => 'Kasir',
+            'is_active' => true,
+        ]);
+        Role::create([
+            'name' => 'Pimpinan',
+            'is_active' => true
         ]);
     }
 }

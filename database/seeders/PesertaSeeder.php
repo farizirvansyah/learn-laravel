@@ -14,14 +14,14 @@ class PesertaSeeder extends Seeder
     public function run(): void
     {
         // INSERT INTO
-        // Peserta::create([
-        //     'name' => 'Fariz Irvansyah',
-        //     'email' => 'fariz.irvansyah@gmail.com',
-        //     'age' => 25,
-        //     'address' => 'Jakarta Selatan',
-        // ]);
+        Peserta::create([
+            'name' => 'Fariz Irvansyah',
+            'email' => 'fariz.irvansyah@gmail.com',
+            'age' => 25,
+            'address' => 'Jakarta Selatan'
+        ]);
 
         // INSERT FAKER
-        Peserta::factory(500)->create();
+        // Peserta::factory(50)->create();
     }
 }

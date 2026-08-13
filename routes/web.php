@@ -31,6 +31,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 // Login
@@ -82,5 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('category', CategoryController::class);
     // Product
     Route::resource('product', ProductController::class);
+    // Setting
+    Route::put('setting/profile/update', [SettingController::class, 'updateProfile'])->name('setting.profile.update');
+    Route::resource('setting', SettingController::class);
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });

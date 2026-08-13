@@ -5,6 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? '' }}</title>
+    @if (!empty($setting?->fav_icon))
+        <link rel="icon" href="{{ asset('storage/' . $setting->fav_icon) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
@@ -167,15 +172,28 @@
 <body>
     <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="sidebar-brand">AdminPanel</div>
+        <div class="sidebar-brand">
+            @if (!empty($setting?->logo))
+                <img src="{{ asset('storage/' . $setting->logo) }}" alt="Logo" class="me-2 rounded"
+                    style="max-height: 32px; max-width: 32px; object-fit: contain;">
+            @endif
+            <span>{{ $setting->sidebar_title ?? 'AdminPanel' }}</span>
+        </div>
         <ul class="sidebar-menu">
-            <li><a href="{{ url('dashboard') }}" class="active">Dashboard</a></li>
-            <li><a href="{{ url('peserta') }}">Peserta</a></li>
-            <li><a href="{{ url('role') }}">Role</a></li>
-            <li><a href="{{ route('category.index') }}">Category</a></li>
-            <li><a href="{{ route('product.index') }}">Product</a></li>
-            <li><a href="#">Pesanan</a></li>
-            <li><a href="#">Pengaturan</a></li>
+            <li><a href="{{ url('dashboard') }}" class="{{ request()->is('dashboard*') ? 'active' : '' }}">Dashboard</a></li>
+            <li><a href="{{ route('product.index') }}" class="{{ request()->is('product*') ? 'active' : '' }}">Product</a></li>
+            <li><a href="{{ route('category.index') }}" class="{{ request()->is('category*') ? 'active' : '' }}">Category</a></li>
+            <li><a href="{{ url('role') }}" class="{{ request()->is('role*') ? 'active' : '' }}">Role</a></li>
+            <li><a href="{{ url('peserta') }}" class="{{ request()->is('peserta*') ? 'active' : '' }}">Peserta</a></li>
+            <li><a href="{{ url('setting') }}" class="{{ request()->is('setting*') ? 'active' : '' }}">Settings</a></li>
+            <li>
+                <form action="{{ route('logout') }}" method="POST" id="sidebarLogoutForm" style="margin: 0;">
+                    @csrf
+                    <a href="javascript:void(0)" onclick="if(confirm('Apakah Anda yakin ingin logout?')) { document.getElementById('sidebarLogoutForm').submit(); }" class="text-danger">
+                        Logout
+                    </a>
+                </form>
+            </li>
         </ul>
     </aside>
     <!-- Main Area -->
@@ -183,10 +201,19 @@
 
         <!-- Navbar -->
         <header class="navbar">
-            <div><strong>{{ $title ?? '' }} Overview</strong></div>
-            <div class="user-profile">
-                <span>{{ auth()->user()->name }}</span>
-                <div class="avatar">A</div>
+            <div><strong>{{ $title ?? '' }}</strong></div>
+            <div class="user-profile d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar">{{ Str::upper(Str::substr(auth()->user()?->name ?? 'A', 0, 1)) }}</div>
+                    <span class="fw-semibold text-secondary">{{ auth()->user()?->name ?? 'Admin' }}</span>
+                </div>
+                <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-danger btn-sm px-3"
+                        onclick="return confirm('Apakah Anda yakin ingin logout?')">
+                        Logout
+                    </button>
+                </form>
             </div>
         </header>
 

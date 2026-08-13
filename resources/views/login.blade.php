@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login - Point Of Sales</title>
+    <title>Login - {{ $setting->login_title ?? 'Point Of Sales' }}</title>
+    @if (!empty($setting?->fav_icon))
+        <link rel="icon" href="{{ asset('storage/' . $setting->fav_icon) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
@@ -15,9 +20,15 @@
         <div class="container">
             <div class="row d-flex align-items-center justify-content-center">
                 <div class="col-lg-6">
-                    <div class="card shadow-lg rounded-4">
+                    <div class="card shadow-lg rounded-4 border-0">
                         <div class="card-body p-4 p-md-5">
-                            <h3 class="text-center mb-5">Login - Point Of Sales</h3>
+                            @if (!empty($setting?->logo))
+                                <div class="text-center mb-3">
+                                    <img src="{{ asset('storage/' . $setting->logo) }}" alt="Logo"
+                                        style="max-height: 70px; max-width: 180px; object-fit: contain;">
+                                </div>
+                            @endif
+                            <h3 class="text-center mb-4 fw-bold text-dark">{{ $setting->login_title ?? 'Point Of Sales' }}</h3>
 
                             <form action="{{ route('actionLogin') }}" method="post">
                                 @csrf

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -20,7 +22,9 @@ class OrderController extends Controller
      */
     public function create()
     {
-        return view('order.create');
+        $categories = Category::get();
+        $products = Product::orderBy('id')->get();
+        return view('order.create', compact('categories', 'products'));
     }
 
     /**

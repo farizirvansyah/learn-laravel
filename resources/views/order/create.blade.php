@@ -165,7 +165,7 @@
                                                 <img src="{{ asset('storage/' . $product->photo) }}" alt="">
                                             </div>
                                             <div class="card-body">
-                                                <span class="badge bgt-light text-dark mb-2">
+                                                <span class="badge bg-light text-dark mb-2">
                                                     {{ $product->category->name ?? '' }}
                                                 </span>
                                                 <h6 class="fw-bold">

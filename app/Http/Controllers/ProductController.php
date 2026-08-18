@@ -60,7 +60,7 @@ class ProductController extends Controller
     {
         //
         $title = 'Show Data';
-        return view('product.index', compact('title'));
+        return view('product.index', compact('title'));  
     }
 
     /**

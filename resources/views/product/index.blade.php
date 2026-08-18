@@ -9,26 +9,36 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Category Name</th>
-                    <th>Name</th>
-                    <th>Price</th>
                     <th>Photo</th>
+                    <th>Name</th>
+                    <th>Category Name</th>
+                    <th>Price</th>
                     <th>Description</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($products as $index => $value)
+                @foreach ($products as $index => $v)
                         <tr>
                             <td>{{ $index += 1 }}</td>
-                            <td>{{ $value->category->name }}</td>
-                            <td>{{ $value->name }}</td>
-                            <td>{{ $value->price }}</td>
-                            <td>{{ $value->photo }}</td>
-                            <td>{{ $value->description }}</td>
                             <td>
-                                <a href="{{ route('product.edit', $value->id) }}" class="btn btn-success btn-sm">Edit</a> |
-                                <form action="{{ route('product.destroy', $value->id) }}" method="POST" style="display:inline;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="{{ asset('storage/' . $v->photo) }}" alt="" width="100" height="100"
+                                        style="object-fit: cover">
+                                    <div>
+                                        <div class="fw-semibold">
+                                            {{ $v->name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ $v->name }}</td>
+                            <td>{{ $v->category->name }}</td>
+                            <td>Rp{{ number_format($v->price) }}</td>
+                            <td>{{ $v->description }}</td>
+                            <td>
+                                <a href="{{ route('product.edit', $v->id) }}" class="btn btn-success btn-sm">Edit</a> |
+                                <form action="{{ route('product.destroy', $v->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm"

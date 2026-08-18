@@ -60,7 +60,7 @@ class ProductController extends Controller
     {
         //
         $title = 'Show Data';
-        return view('product.index', compact('title'));  
+        return view('product.index', compact('title'));
     }
 
     /**
@@ -102,8 +102,14 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+
+    public function destroy(Product $product)
     {
-        //
+        if ($product->photo) {
+            Storage::disk('public')->delete($product->photo);
+        }
+        $product->delete();
+
+        return redirect()->to('product')->with('success', 'Delete product successfully!');
     }
 }

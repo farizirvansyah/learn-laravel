@@ -4,7 +4,7 @@
         @csrf
         <div class="mb-3">
             <label for="Category_id" class="form-label">Category</label>
-            <select name="category_id" id="Category_id" class="form-control">
+            <select name="category_id" id="Category_id" class="form-control" required>
                 <option value="">-- Select One --</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}" class="form-control">{{ $category->name }}</option>

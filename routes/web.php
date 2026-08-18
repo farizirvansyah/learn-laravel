@@ -28,6 +28,7 @@ use App\Http\Controllers\BelajarController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
@@ -82,5 +83,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('category', CategoryController::class);
     // Product
     Route::resource('product', ProductController::class);
+    // Order
+    Route::resource('order', OrderController::class);
+    // Order Detail
+    // Route::resource('order', OrderController::class);
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });

@@ -28,7 +28,7 @@
                     <div class="card shadow p-3">
                         <div class="d-flex align-items-center gap-3">
                             <div>
-                                <i class="bi bi-cart" style="font-size: 2rem;"></i>
+                                <i class="bi bi-cart-fill" style="font-size: 2rem;"></i>
                             </div>
                             <div>
                                 <small class="text-muted">Today's Transactions</small>
@@ -115,7 +115,26 @@
                 </div>
 
 
-                <div class="col-lg-4"></div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow cart-box">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h5 class="fw-bold mb-0">
+                                <i class="bi bi-cart"></i>Cart
+                            </h5>
+                            <span class="badge bg-dark" id="cartCount">0</span>
+                        </div>
+                        <div class="mb-3" id="cartItems">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Sub Total</span>
+                                <strong id="subTotal">Rp0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total</span>
+                                <strong id="subTotal">Rp0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

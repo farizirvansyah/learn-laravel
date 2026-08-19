@@ -147,11 +147,11 @@
                             </div>
 
                             <div class="mb-4">
-                                <button class="btn btn-dark btn-sm me-1 category-btn">
+                                <button class="btn btn-dark btn-sm me-1 category-btn" onclick="filterCategory('all', this)" data-category="all">
                                     All
                                 </button>
                                 @foreach ($categories as $category)
-                                    <button class="btn btn-dark btn-sm me-1 category-btn">
+                                    <button class="btn btn-dark btn-sm me-1 category-btn" onclick="filterCategory('{{ $category->id }}', this)" data-category="{{ $category->id }}">
                                         {{ $category->name ?? '' }}
                                     </button>
                                 @endforeach
@@ -159,7 +159,7 @@
 
                             <div class="row g-3" id="productList">
                                 @foreach ($products as $product)
-                                    <div class="col-md-4 col-sm-6">
+                                    <div class="col-md-4 col-sm-6 product-items" data-category="{{ $product->category_id }}">
                                         <div class="card product-card shadow h-100">
                                             <div class="product-image">
                                                 <img src="{{ asset('storage/' . $product->photo) }}" alt="">
@@ -224,6 +224,17 @@
             </div>
         </main>
     </div>
+
+    <script>
+        function filterCategory(categoryId, button)
+        {
+            // selectorAll = array
+            const products = document.querySelectorAll('.product-item');
+            products.forEach(function(product) {
+                console.log(product);
+            });
+        }
+    </script>
 </body>
 
 </html>

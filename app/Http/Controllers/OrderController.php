@@ -23,7 +23,7 @@ class OrderController extends Controller
     public function create()
     {
         $categories = Category::get();
-        $products = Product::orderBy('id')->get();
+        $products = Product::with('category')->orderBy('id')->get();
         return view('order.create', compact('categories', 'products'));
     }
 

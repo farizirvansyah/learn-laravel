@@ -13,13 +13,6 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // Category::
-        // protected $fillable = [
-        //     'name',
-        //     'category_id',
-        //     'photo',
-        //     'price',
-        //     'description'
-        // ];
+        //
     }
 }

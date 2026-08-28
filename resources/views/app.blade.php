@@ -169,11 +169,15 @@
     <aside class="sidebar">
         <div class="sidebar-brand">AdminPanel</div>
         <ul class="sidebar-menu">
+            {{-- @foreach ($menus as $index => $v) --}}
+                {{-- <li><a href="{{ url($v->url) }}" class="active">{{ $v->name }}</a></li> --}}
+            {{-- @endforeach --}}
             <li><a href="{{ url('dashboard') }}" class="active">Dashboard</a></li>
-            <li><a href="{{ route('order.index') }}">Transaction Order</a></li>
+            <li><a href="{{ route('order.create') }}">Transaction Order</a></li>
             <li><a href="{{ route('product.index') }}">Product</a></li>
             <li><a href="{{ route('category.index') }}">Category</a></li>
             <li><a href="{{ url('role') }}">Role</a></li>
+            <li><a href="{{ route('menu.index') }}">Menu</a></li>
             <li><a href="{{ url('peserta') }}">Peserta</a></li>
             <li><a href="#">Setting</a></li>
         </ul>
@@ -200,7 +204,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
-        </script>
+    </script>
 </body>
 
 </html>

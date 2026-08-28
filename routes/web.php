@@ -28,10 +28,12 @@ use App\Http\Controllers\BelajarController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 // Login
@@ -77,6 +79,9 @@ Route::delete('delete/{id}', [PesertaController::class, 'delete'])->name('delete
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::resource('dashboard', DashboardController::class);
+    // Menu
+    Route::resource('menu', MenuController::class);
+    Route::get('menu/sidebar', [MenuController::class, 'sidebar'])->name('sidebar');
     // Role
     Route::resource('role', RoleController::class);
     // Category
@@ -87,5 +92,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('order', OrderController::class);
     // Order Detail
     // Route::resource('order', OrderController::class);
+    // Setting
+    Route::put('setting/profile/update', [SettingController::class, 'updateProfile'])->name('setting.profile.update');
+    Route::resource('setting', SettingController::class);
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 });

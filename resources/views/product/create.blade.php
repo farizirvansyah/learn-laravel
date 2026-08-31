@@ -14,12 +14,17 @@
 
         <div class="mb-3">
             <label for="Name" class="form-label">Name</label>
-            <input type="text" class="form-control" name="name" id="Name">
+            <input type="text" class="form-control" name="name" id="Name" require>
         </div>
 
         <div class="mb-3">
             <label for="Price" class="form-label">Price</label>
-            <input type="number" min="1" class="form-control" name="price" id="Price">
+            <input type="number" min="1" class="form-control" name="price" id="Price" require>
+        </div>
+
+        <div class="mb-3">
+            <label for="Qty" class="form-label">Quantity</label>
+            <input type="number" min="1" class="form-control" name="qty" id="Qty" require>
         </div>
 
         <div class="mb-3">

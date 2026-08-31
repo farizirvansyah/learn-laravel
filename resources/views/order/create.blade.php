@@ -10,6 +10,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+
     <style>
         body {
             background-color: #f5f6f8;
@@ -20,12 +24,6 @@
             cursor: pointer;
         }
 
-        /* .product-item:hover {
-            cursor: pointer;
-            border: #000;
-            border-radius: 15px;
-        } */
-
         .product-card {
             border: none;
             border-radius: 15px;
@@ -35,7 +33,7 @@
 
         .product-card:hover {
             transform: translateY(-4);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0, 10);
         }
 
         .product-image {
@@ -69,7 +67,7 @@
             border-bottom: none;
         }
 
-        .quantity-btn {
+        .quantity.btn {
             width: 30px;
             height: 30px;
             padding: 0;
@@ -90,6 +88,34 @@
             background-color: #212529 !important;
             color: white !important;
             border-color: #212529 !important;
+        }
+
+        /* Tampilan khusus saat mencetak (Print Struk) */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #receipt-print,
+            #receipt-print * {
+                visibility: visible;
+            }
+
+            #receipt-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 80mm;
+                /* Standar Ukuran Printer Struk Thermal */
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 12px;
+                color: #000;
+                padding: 10px;
+            }
+
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -166,10 +192,10 @@
                             <div class="mb-4">
                                 <button class="btn btn-dark btn-sm me-1 category-btn"
                                     onclick="filterCategory('all', this)" data-category="all">
-                                    All
+                                    Semua
                                 </button>
                                 @foreach ($categories as $category)
-                                    <button class="btn btn-light btn-outline-dark btn-sm me-1 category-btn"
+                                    <button class="btn btn-outline-dark btn-sm me-1 category-btn"
                                         onclick="filterCategory('{{ $category->id }}', this)"
                                         data-category="{{ $category->id }}">
                                         {{ $category->name ?? '' }}
@@ -182,20 +208,20 @@
                                     <div class="col-md-4 col-sm-6 product-item"
                                         data-category="{{ $product->category_id }}" data-id="{{ $product->id }}"
                                         data-name="{{ $product->name }}" data-price="{{ $product->price }}"
-                                        onclick="addToCart('{{ $product->id }}')">
+                                        onclick="addToCart({{ $product->id }})">
                                         <div class="card product-card shadow h-100">
                                             <div class="product-image">
                                                 <img src="{{ asset('storage/' . $product->photo) }}" alt="">
                                             </div>
                                             <div class="card-body">
                                                 <span class="badge bg-light text-dark mb-2">
-                                                    {{ $product->category->name ?? '' }}
+                                                    {{ $product->category->name }}
                                                 </span>
                                                 <h6 class="fw-bold">
                                                     {{ $product->name ?? '' }}
                                                 </h6>
                                                 <span class="price">
-                                                    Rp{{ number_format($product->price, 0) ?? '' }}</span>
+                                                    Rp{{ number_format($product->price, 0) }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -238,7 +264,8 @@
                                 <span class="fw-bold">Total</span>
                                 <strong class="total-price" id="total">Rp0</strong>
                             </div>
-                            <button class="btn btn-success w-100 py-3" onclick="processPayment()">Payment</button>
+                            <button id="btnOpenPaymentModal" onclick="openModalPayment()"
+                                class="btn btn-success w-100 py-3">Payment</button>
                         </div>
                     </div>
 
@@ -248,46 +275,158 @@
         </main>
     </div>
 
-    <script>
-        let cart = [];
-        const TAX_RATE = 0.10;
+    <!-- Modal -->
+    <div class="modal fade" id="paymentMethod" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="paymentMethodLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="paymentMethodLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="" class="form-label fw-semibold">Customer Name</label>
+                        <input type="text" id="customer_name" class="form-control">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md6 mb-1">
+                            <strong class="bg-success p-2 text-white rounded" id="total-paid">Harga : Rp.0</strong>
+                        </div>
+                    </div>
+                    <div class="row only-cash d-none align-items-center my-3">
+                        <div class="col-md-6">
+                            <label for="cash_paid" class="form-label fw-bold">Pembayaran Cash :</label>
+                            <input type="number" id="cash_paid" step="any" min="0"
+                                class="form-control mb-2" oninput="calculateChange()">
+                        </div>
+                        <div class="col-md-6">
+                            <strong class="bg-primary p-2 text-white rounded" id="change-paid">Kembalian :
+                                Rp.0</strong>
+                        </div>
+                    </div>
+                    <h5 class="mb-3 fw-bold">Pilih Metode Pembayaran</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="w-100 cursor-pointer">
+                                <input type="radio" name="payment_method" value="cash"
+                                    class="d-none payment-option">
+                                <div class="card p-3 shadow-sm border payment-card text-center h-100">
+                                    <h4 class="text-success fw-bold"><i class="bi bi-cash-stack"></i> Cash</h4>
+                                    <p class="text-muted small">Bayar langsung di Kasir Secara Tunai.</p>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="w-100 cursor-pointer">
+                                <input type="radio" name="payment_method" value="midtrans"
+                                    class="d-none payment-option">
+                                <div class="card p-3 shadow-sm border payment-card text-center h-100">
+                                    <h4 class="text-success fw-bold"><i class="bi bi-qr-code-scan"></i> Midtrans</h4>
+                                    <p class="text-muted small">Pembayaran online via QRIS/E-Wallet</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" onclick="processPayment()" class="btn btn-primary">Pay Now!</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // ==========================================
-        // FILTER CATEGORY
-        // ==========================================
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
+    </script>
+
+    <script>
+        document.querySelectorAll('.payment-option').forEach(input => {
+            input.addEventListener('change', function() {
+                document.querySelectorAll('.payment-card').forEach(card => card.classList.remove(
+                    'border-success', 'border-primary', 'bg-light'));
+                if (this.checked) {
+                    const card = this.nextElementSibling;
+                    card.classList.add(this.value === 'cash' ? 'border-success' : 'border-primary',
+                        'bg-light');
+                }
+
+                const onlyCashBox = document.querySelector('.only-cash');
+                if (this.value === 'cash') {
+                    onlyCashBox.classList.remove('d-none');
+                    document.getElementById('cash_paid').focus();
+                } else {
+                    onlyCashBox.classList.add('d-none');
+                    document.getElementById('cash_paid').value = 0;
+                }
+            });
+        });
+
+        function calculateChange() {
+            let subtotal = 0;
+            cart.forEach(function(item) {
+                subtotal += Number(item.price) * Number(item.qty);
+
+            });
+            const tax = subtotal * 0.1;
+            const totalAmount = subtotal + tax;
+
+            const cashPaidInput = parseFloat(document.getElementById('cash_paid').value) || 0;
+            const changeMoney = cashPaidInput - totalAmount;
+            const changeElement = document.getElementById('change-paid');
+            if (changeMoney < 0) {
+                changeElement.innerText = `Kurang Rp. ${formatRupiah(Math.abs(changeMoney))}`;
+                //changeElement.classList.add('text-danger');
+                changeElement.classList.add('bg-danger');
+                changeElement.classList.remove('bg-primary');
+            } else {
+                changeElement.innerText = `Kembali Rp. ${formatRupiah(Math.abs(changeMoney))}`;
+                changeElement.classList.add('bg-primary');
+                changeElement.classList.remove('bg-danger');
+            }
+        }
+
+
+        function openModalPayment() {
+            if (cart.length === 0) {
+                alert('Cart is Empty')
+                return;
+            }
+            const modal = new bootstrap.Modal(document.getElementById('paymentMethod'));
+            modal.show();
+        }
+
         function filterCategory(categoryId, button) {
-            // console.log(categoryId);
             // selectorAll = array
-            const products = document.querySelectorAll(`.product-item`);
+            const products = document.querySelectorAll('.product-item');
             products.forEach(function(product) {
+                console.log(product);
                 const categoryName = product.dataset.category;
-                // jika user click category bernama all, muncul category all
-                // jika user click category snack, muncul
-                if (categoryId === 'all' || categoryName === String(categoryId)) {
+                // jika user click dategory bernama all, muncul category all
+                // jika user click dategory snack, muncul category snack
+                if (categoryId == 'all' || categoryName === String(categoryId)) {
+                    // tanda + itu menggabungkan (1+1 = 11)
                     product.style.display = "";
                 } else {
                     product.style.display = 'none';
                 }
             });
-            // Ketika user reset category
+
+            //ketika user reset category
             document.querySelectorAll('.category-btn').forEach(function(btn) {
                 btn.classList.remove('btn-dark', 'active');
                 btn.classList.add('btn-outline-dark');
             });
-            // Ketika user milih category
+            //ketika user milih category
             button.classList.remove('btn-outline-dark');
             button.classList.add('btn-dark', 'active');
-
-            // Reset search ketika memilih category
-            document.getElementById('searchProduct').value = "";
         }
 
+        let cart = [];
 
-        // ==========================================
-        // ADD TO CART
-        // ==========================================
         function addToCart(productId) {
-            // console.log('Product ID:', productId);
+
 
             const product = document.querySelector(`.product-item[data-id="${productId}"]`);
             if (!product) {
@@ -300,7 +439,7 @@
 
             const existingItem = cart.find(function(item) {
                 return Number(item.id) === Number(productId);
-            });
+            })
 
             if (existingItem) {
                 existingItem.qty++;
@@ -312,114 +451,91 @@
                     qty: 1,
                 })
             }
-            // console.log('Cart:', cart);
+
+
+
             displayCart();
         }
 
         function displayCart() {
-            const cartItems = document.getElementById('cartItems');
-            // const cartItems = document.querySelector('#cartItems');
+            const cartItems = document.getElementById('cartItems')
 
             cartItems.innerHTML = "";
-            // Jika cart kosong
             if (cart.length === 0) {
                 cartItems.innerHTML = `
-                    <div class="text-center text-muted py-5">
-                        <i class="bi bi-cart4"
-                            style="font-size: 2rem;">
-                        </i>
-                        <p class="mt-2">
-                            Empty Cart
-                        </p>
-                    </div>
-                `;
+                <div class="text-center text-muted py-5">
+                <i class="bi bi-cart4"></i>
+                    <p>Empty Cart</p>
+                </div>
+            `;
 
-                // PENTING:
-                // Reset semua total menjadi 0
-                calculateCart();
-
-                return;
             }
 
             cart.forEach(function(item) {
                 cartItems.innerHTML += `
                 <div class="cart-item">
-
                     <div class="d-flex justify-content-between">
-                        <div>
-                            <strong>
-                                ${item.name}
-                            </strong>
-                            <div class="small text-muted">Rp${formatRupiah(item.price)}</div>
-                        </div>
-
+                    <div>
                         <strong>
-                            Rp${formatRupiah(item.price * item.qty)}
+                        ${item.name}
                         </strong>
+                        <div class="small text-muted">${formatRupiah(item.price)}</div>
                     </div>
+                        <strong>
+                          ${formatRupiah(item.price * item.qty)}
+                        </strong>
+                </div>
+                <div class="d-flex align-items-center mt-3">
+                    <button onclick="decreaseItem(${item.id})" type="button" class="btn btn-outline-secondary quantity-btn">
+                    -
+                    </button>
+                    <span>${item.qty}</span>
+                    <button onclick="increaseItem(${item.id})" type="button" class="btn btn-outline-secondary quantity-btn">
+                    +
+                    </button>
 
-                    <div class="d-flex align-items-center mt-3">
-                        <button onclick="decreaseItem(${item.id})" type="button" class="btn btn-outline-secondary quantity-btn">
-                            -
-                        </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeItem(${item.id})">
+                    <i class="bi bi-trash"></i>
+                    </button>
 
-                        <span>${item.qty}</span>
-
-                        <button onclick="increaseItem(${item.id})" type="button" class="btn btn-outline-secondary quantity-btn">
-                            +
-                        </button>
-
-                        <button type="button" class="btn btn-sm btn-outline-danger ms-auto" onclick="removeItem(${item.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-
-            </div>`
-                calculateCart();
+                </div>
+                </div>`
             })
+
+            calculateCart();
+
         }
 
-        // ==========================================
-        // REMOVE ITEM
-        // ==========================================
         function removeItem(productId) {
             cart = cart.filter(function(item) {
                 return Number(item.id) !== Number(productId);
             });
+
             displayCart();
         }
 
-        // ==========================================
-        // DECREASE ITEM
-        // ==========================================
         function decreaseItem(productId) {
             const item = cart.find(function(item) {
                 return Number(item.id) === Number(productId);
             });
-            // Safety check
-            if (!item) {
-                return;
-            }
+            console.log(item);
+
             item.qty--;
             if (item.qty <= 0) {
-                removeItem(productId)
+                removeItem(productId);
                 return;
             }
             displayCart();
         }
 
-        // ==========================================
-        // INCREASE ITEM
-        // ==========================================
         function increaseItem(productId) {
             const item = cart.find(function(item) {
                 return Number(item.id) === Number(productId);
             });
-            // Safety check
-            if (!item) {
-                return;
-            }
+            console.log(item);
+
             item.qty++;
+
             displayCart();
         }
 
@@ -432,113 +548,76 @@
                 itemCount += Number(item.qty);
             });
 
-            const tax = subtotal * TAX_RATE;
+            const tax = subtotal * 0.10;
+            console.log(tax);
             const total = subtotal + tax;
+            document.getElementById('subTotal').innerText = `Rp. ${formatRupiah(subtotal)}`;
+            document.getElementById('tax').innerText = `Rp. ${formatRupiah(tax)}`;
+            document.getElementById('total').innerText = `Rp. ${formatRupiah(total)}`;
+            document.getElementById('total-paid').innerText = `Rp. ${formatRupiah(total)}`
+            document.getElementById('cartCount').innerText = itemCount;
 
-            document.getElementById('cartCount').innerText = `${itemCount}`;
-            document.getElementById('subTotal').innerText = `Rp${formatRupiah(subtotal)}`;
-            document.getElementById('tax').innerText = `Rp${formatRupiah(tax)}`;
-            document.getElementById('total').innerText = `Rp${formatRupiah(total)}`;
+            return {
+                total
+            };
         }
 
-        // ==========================================
-        // FORMAT RUPIAH
-        // ==========================================
         function formatRupiah(number) {
             return new Intl.NumberFormat('id-ID').format(number);
         }
-
-        // ==========================================
-        // SEARCH PRODUCT + CATEGORY
-        // ==========================================
-        // function searchProduct() {
-        //     const search = document.getElementById('searchProduct').value.toLowerCase().trim();
-        //     const products = document.querySelectorAll('.product-item');
-        //     products.forEach(function(product) {
-        //         const productName = product.dataset.name.toLowerCase();
-        //         // Jika produk name di dalam tabel nilainya sama pada saat user input
-        //         if (
-        //             productName.includes(search)
-        //         ) {
-        //             product.style.display = "";
-        //         } else {
-        //             product.style.display = "none";
-        //         }
-        //     });
-        // }
 
         function searchProduct() {
             const search = document.getElementById('searchProduct').value.toLowerCase().trim();
             const products = document.querySelectorAll('.product-item');
 
             products.forEach(function(product) {
-                // Nama product
-                const productName =
-                    (product.dataset.name || '').toLowerCase();
-                // Category ID
-                const categoryId = (product.dataset.category || '').toLowerCase();
+                const productName = product.dataset.name.toLowerCase();
 
-
-                // Ambil nama category dari badge
-                const categoryNameElement =
-                    product.querySelector('.badge');
-
-
-                const categoryName =
-                    categoryNameElement ?
-                    categoryNameElement.textContent
-                    .toLowerCase()
-                    .trim() :
-                    '';
-
-
-                // Search bisa berdasarkan:
-                // 1. Nama produk
-                // 2. Nama category
-                // 3. Category ID
-                const isMatch =
-                    productName.includes(search) ||
-                    categoryName.includes(search) ||
-                    categoryId.includes(search);
-
-
-                if (isMatch) {
-
-                    product.style.display = "";
-
+                // jika product name didalam tabel nilainya sama pada saat user input
+                if (productName.includes(search)) {
+                    product.display = "";
                 } else {
-
                     product.style.display = "none";
-
                 }
-
-            });
-
-
-            // Jika search dikosongkan,
-            // tampilkan kembali semua product
-            if (search === '') {
-
-                products.forEach(function(product) {
-
-                    product.style.display = "";
-
-                });
-
-            }
+            })
         }
-
-        // ==========================================
-        // CHECK CART
-        // ==========================================
         async function processPayment() {
             if (cart.length === 0) {
                 alert('Cart is Empty')
                 return;
             }
 
+            // const customerNameInput = document.getElementById('customer_name')?.value || 'No-Name';
+            // const selectMethod = document.querySelector('input[name=payment_method]:checked')?.value || 'cash';
+            const selectedPayment = document.querySelector('input[name="payment_method"]:checked');
+            const paymentMethod = selectedPayment ? selectedPayment.value : 'cash';
+            const customerName = document.getElementById('customer_name').value;
+
+            if (!selectedPayment) {
+                alert("PILIH METODE PEMBAYARAN!");
+                return;
+            }
+            const {
+                total
+            } = calculateCart();
+            const cashPayInput = document.getElementById('cash_paid');
+            const change = 0;
+
+            if (paymentMethod === 'cash') {
+                const cashPaidValue = parseFloat(cashPayInput?.value) || 0;
+
+                if (!cashPaidValue) {
+                    alert("Input pembayaran terlebih dahulu!");
+                    cashPayInput.focus();
+                    return;
+                }
+                change = cashPaidValue - total;
+            }
+
+            // console.log(customerName);
+            // console.log(paymentMethod);
+
             try {
-                // SEND DATA TO LARAVEL
                 const response = await fetch("{{ route('order.store') }}", {
                     method: "POST",
                     headers: {
@@ -551,42 +630,66 @@
                         items: cart.map(function(item) {
                             return {
                                 id: item.id,
-                                qty: Number(item.qty)
+                                qty: item.qty
                             }
                         }),
-                        payment_method: "cash"
+                        payment_method: paymentMethod,
+                        customer_name: customerName,
+                        order_change: change
                     })
-                });
-
+                })
                 const result = await response.json();
-                console.log('Order berhasil');
-                cart = [];
-                displayCart();
+                if (!response.ok) {
+                    alert(result.message || 'Terjadi kesalahan sistem');
+                    return;
+                }
+                if (result.payment_method === "midtrans") {
+                    //MIDTRANS
+                    window.snap.pay(result.snap_token, {
+                        onSuccess: function(result) {
+                            /* You may add your own implementation here */
+                            alert("payment success!");
+                            window.open(`${result.order_id}/print`, '_blank');
+                            cart = [];
+                            displayCart();
+                            location.reload();
+                            //console.log(result);
+                        },
+                        onPending: function(result) {
+                            /* You may add your own implementation here */
+                            alert("wating your payment!");
+                            console.log(result);
+                        },
+                        onError: function(result) {
+                            /* You may add your own implementation here */
+                            alert("payment failed!");
+                            console.log(result);
+                        },
+                        onClose: function() {
+                            /* You may add your own implementation here */
+                            alert('you closed the popup without finishing the payment');
+                        }
+                    });
+                } else {
+                    alert('Transaksi Cash Berhasil!');
+                    window.open(`${result.order_id}/print`, '_blank');
+                    cart = [];
+                    displayCart();
+                    location.reload();
+                    //    location.reload();
+                }
 
-                location.reload();
+
             } catch (error) {
-                console.log(error);
-                alert(error.message);
+                console.log(error)
+                alert('GAGAL MEMPROSES TRANSAKSI' + error.message);
             }
         }
 
-        // let subtotal = 0;
-        // cart.forEach(function(item) {
-        //     subtotal += item.price * item.qty;
-        // });
-        // const tax = subtotal * TAX_RATE;
-        // const total = subtotal + tax;
-        // document.getElementById('paymentSubtotal').innerText = formatRupiah(subtotal);
-        // document.getElementById('paymentTax').innerText = formatRupiah(tax);
-        // document.getElementById('paymentTotal').innerText = formatRupiah(total);
-        // document.getElementById('cashAmount').value = '';
-        // document.getElementById('changeAmount').innerText = 'Rp0';
-        // const modalElement = document.getElementById('paymentModal');
-        // const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-        // modal.show();
-
         displayCart();
     </script>
+
+
 </body>
 
 </html>

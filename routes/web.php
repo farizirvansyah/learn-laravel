@@ -91,9 +91,13 @@ Route::middleware('auth')->group(function () {
     // Order
     Route::resource('order', OrderController::class);
     // Order Detail
-    // Route::resource('order', OrderController::class);
+    // Route::resource('order-detail', OrderController::class);
     // Setting
     Route::put('setting/profile/update', [SettingController::class, 'updateProfile'])->name('setting.profile.update');
     Route::resource('setting', SettingController::class);
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/order/{id}/print', [OrderController::class, 'printReceipt'])->name('order.print');
 });
+Route::middleware(['auth', 'admin'])->group(function () {});
+Route::middleware(['auth', 'kasir'])->group(function () {});
+Route::middleware(['auth', 'pimpinan'])->group(function () {});

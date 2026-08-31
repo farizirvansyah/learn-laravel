@@ -3,7 +3,7 @@
     <form action="{{ route('category.store') }}" method="post" class="form form-control">
         @csrf
         <div class="mb-3">
-            <label for="" class="form-label">Nama</label>
+            <label for="" class="form-label">Name</label>
             <input type="text" class="form-control" name="name" required>
         </div>
         <div class="form-check mb-3">
@@ -19,7 +19,7 @@
             </label>
         </div>
         <div class="mb-3">
-            <button type="submit" class="btn btn-primary">Simpan</button>
+            <button type="submit" class="btn btn-primary">Save</button>
         </div>
     </form>
 @endsection

@@ -15,21 +15,21 @@
             </thead>
             <tbody>
                 @foreach ($categories as $index => $value)
-                        <tr>
-                            <td>{{ $index += 1 }}</td>
-                            <td>{{ $value->name }}</td>
-                            <td>
-                                <a href="{{ route('category.edit', $value->id) }}" class="btn btn-success btn-sm">Edit</a> |
-                                <form action="{{ route('category.destroy', $value->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Yakin ingin menghapus?')">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tr>
+                        <td>{{ $index += 1 }}</td>
+                        <td>{{ $value->name }}</td>
+                        <td>
+                            <a href="{{ route('category.edit', $value->id) }}" class="btn btn-success btn-sm">Edit</a> |
+                            <form action="{{ route('category.destroy', $value->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Are you sure you want to delete this?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
                 @endforeach
+            </tbody>
         </table>
     </div>
 @endsection

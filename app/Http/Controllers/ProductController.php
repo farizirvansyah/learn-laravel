@@ -41,6 +41,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'name' => $request->name,
             'price' => $request->price,
+            'qty' => $request->qty,
             'description' => $request->description
         ];
 
@@ -86,6 +87,7 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'name' => $request->name,
             'price' => $request->price,
+            'qty' => $request->qty,
             'description' => $request->description
         ];
 

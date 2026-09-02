@@ -8,7 +8,8 @@ class Order extends Model
 {
     protected $fillable = ['order_code', 'order_amount', 'order_change', 'status'];
 
-    public function orderDetails() {
+    public function orderDetails()
+    {
         return $this->hasMany();
     }
 }

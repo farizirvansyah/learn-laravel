@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
 {
@@ -14,14 +13,13 @@ class MenuController extends Controller
     public function sidebar()
     {
         $menus = Menu::all();
-        $title = '';
-        return view('app', compact('title', 'menus'));
+        return view('app', compact('menus'));
     }
+
     public function index()
     {
-        $menus = Menu::get();
-        $title = 'Data Menu';
-        return view('menu.index', compact('title', 'menus'));
+        $menus = Menu::all();
+        return view('menu.index', compact('menus'));
     }
 
     /**
@@ -29,8 +27,7 @@ class MenuController extends Controller
      */
     public function create()
     {
-        $title = 'Create Data';
-        return view('menu.create', compact('title'));
+        return view('menu.create');
     }
 
     /**
@@ -38,16 +35,24 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
-        $data = [
-            'name' => $request->name,
-            'parent_id' => $request->parent_id,
-            'sort_order' => $request->sort_order,
-            'url' => $request->url,
-            'is_active' => $request->is_active
-        ];
+        $request->validate([
+            'parent_id' => 'nullable|exists:menus,id',
+            'name' => 'required|string',
+            'icon' => 'required|string',
+            'url' => 'nullable|string|max:88',
+            'sort_order' => 'nullable|integer',
+            'is_active' => 'required|boolean'
+        ]);
 
-        Menu::create($data);
-        return redirect()->to('menu')->with('success', 'Create menu successfully!');
+        Menu::create([
+            'parent_id' => $request->parent_id,
+            'name' => $request->name,
+            'icon' => $request->icon,
+            'url' => $request->url,
+            'sort_order' => $request->sort_order,
+            'is_active' => $request->is_active
+        ]);
+        return redirect()->to('menu');
     }
 
     /**
@@ -55,8 +60,7 @@ class MenuController extends Controller
      */
     public function show(string $id)
     {
-        $title = 'Show Data';
-        return view('menu.index', compact('title'));
+        //
     }
 
     /**
@@ -64,32 +68,15 @@ class MenuController extends Controller
      */
     public function edit(string $id)
     {
-        $title = 'Edit Data';
-        $menu = Menu::findOrFail($id);
-        return view('menu.edit', compact('title', 'menu'));
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Menu $menu)
+    public function update(Request $request, string $id)
     {
-        $data = [
-            'name' => $request->name,
-            'parent_id' => $request->parent_id,
-            'sort_order' => $request->sort_order,
-            'url' => $request->url,
-            'is_active' => $request->is_active
-        ];
-
-        if ($request->hasFile('icon')) {
-            if ($menu->icon) {
-                Storage::disk('public')->delete($menu->icon);
-            }
-            $data['icon'] = $request->file('icon')->store('menu', 'public');
-        }
-        $menu->update($data);
-        return redirect()->to('menu')->with('success', 'Update menu successfully!');
+        //
     }
 
     /**
@@ -97,8 +84,6 @@ class MenuController extends Controller
      */
     public function destroy(string $id)
     {
-        $menu = Menu::find($id);
-        $menu->delete();
-        return redirect()->to('menu')->with('success', 'Delete menu successfully!');
+        //
     }
 }

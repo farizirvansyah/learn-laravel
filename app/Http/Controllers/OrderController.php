@@ -144,7 +144,6 @@ class OrderController extends Controller
         $order = Order::with('orderDetails.product')->find($id);
         return view('order.print', compact('order'));
     }
-
     /**
      * Display the specified resource.
      */

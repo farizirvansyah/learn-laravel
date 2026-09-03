@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    //
     protected $fillable = ['name', 'category_id', 'photo', 'price', 'qty', 'description'];
 
     // many to one dari category
